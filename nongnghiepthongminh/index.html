@@ -1,0 +1,1558 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Agriculture Monitoring System</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        /* Sticky navigation */
+        .sticky-nav {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            transition: all 0.3s;
+        }
+        
+        /* Active navigation link */
+        .nav-link.active {
+            background: linear-gradient(135deg, #2d5016, #6b8e23);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(45, 80, 22, 0.3);
+        }
+        
+        /* Section spacing */
+        .scroll-section {
+            scroll-margin-top: 140px;
+            padding-top: 2rem;
+            padding-bottom: 4rem;
+        }
+        
+        /* Progress indicator */
+        .scroll-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #2d5016, #6b8e23, #87ceeb);
+            transform-origin: left;
+            z-index: 9999;
+        }
+        
+        /* Fixed chart container */
+        .chart-container {
+            position: relative;
+            height: 250px;
+            width: 100%;
+        }
+        
+        .chart-container-large {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+        
+        canvas {
+            display: block;
+            max-height: 100%;
+        }
+    </style>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'agri-green': '#2d5016',
+                        'agri-light-green': '#6b8e23',
+                        'agri-brown': '#8b4513',
+                        'agri-earth': '#d2b48c',
+                        'agri-sky': '#87ceeb',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50">
+    
+    <!-- Scroll Progress Bar -->
+    <div id="scrollProgress" class="scroll-progress" style="transform: scaleX(0)"></div>
+    
+    <!-- Top Navbar - Fixed -->
+    <nav class="bg-gradient-to-r from-agri-green to-agri-light-green text-white shadow-2xl sticky-nav">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <i class="fas fa-leaf text-3xl animate-bounce-slow"></i>
+                    <div>
+                        <h1 class="text-2xl font-bold">SMART AGRICULTURE MONITORING</h1>
+                        <p class="text-sm text-green-100">Real-time IoT Dashboard - Scroll View</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="text-right">
+                        <p class="text-sm">Connection Status</p>
+                        <div class="flex items-center space-x-2">
+                            <span id="connectionStatus" class="h-3 w-3 rounded-full bg-yellow-400 animate-pulse"></span>
+                            <span id="connectionText" class="text-sm">Connecting...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Smooth Scroll Navigation -->
+    <nav class="sticky-nav bg-white shadow-lg" style="top: 68px;">
+        <div class="container mx-auto px-6">
+            <div class="flex space-x-2 overflow-x-auto">
+                <a href="#overview" class="nav-link active px-6 py-4 text-center font-semibold transition-all duration-300 hover:bg-green-50 whitespace-nowrap rounded-t-xl">
+                    <i class="fas fa-home mr-2"></i>Overview
+                </a>
+                <a href="#sensors" class="nav-link px-6 py-4 text-center font-semibold transition-all duration-300 hover:bg-green-50 whitespace-nowrap rounded-t-xl">
+                    <i class="fas fa-chart-line mr-2"></i>Sensor Dashboard
+                </a>
+                <a href="#control" class="nav-link px-6 py-4 text-center font-semibold transition-all duration-300 hover:bg-green-50 whitespace-nowrap rounded-t-xl">
+                    <i class="fas fa-sliders-h mr-2"></i>Control Panel
+                </a>
+                <a href="#analytics" class="nav-link px-6 py-4 text-center font-semibold transition-all duration-300 hover:bg-green-50 whitespace-nowrap rounded-t-xl">
+                    <i class="fas fa-chart-bar mr-2"></i>Analytics
+                </a>
+                <a href="#ai" class="nav-link px-6 py-4 text-center font-semibold transition-all duration-300 hover:bg-green-50 whitespace-nowrap rounded-t-xl">
+                    <i class="fas fa-brain mr-2"></i>AI Detection
+                </a>
+                <a href="#system" class="nav-link px-6 py-4 text-center font-semibold transition-all duration-300 hover:bg-green-50 whitespace-nowrap rounded-t-xl">
+                    <i class="fas fa-cog mr-2"></i>System Info
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content - Scrollable Sections -->
+    <div class="container mx-auto px-6 py-8">
+        
+        <!-- OVERVIEW SECTION -->
+        <section id="overview" class="scroll-section">
+            <div class="mb-8 animate-fade-in">
+                <h2 class="text-5xl font-bold text-agri-green mb-3 tracking-tight">📊 Dashboard Overview</h2>
+                <p class="text-gray-600 text-xl">Real-time monitoring of your smart agriculture system</p>
+                <div class="h-1 w-32 bg-gradient-to-r from-agri-green to-agri-light-green rounded-full mt-4"></div>
+            </div>
+            
+            <!-- KPI Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+                <div class="bg-white rounded-2xl shadow-2xl p-6 border-l-4 border-red-500 transform hover:scale-105 transition-all">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-sm font-semibold text-gray-500 uppercase mb-2">Temperature</p>
+                            <p class="text-5xl font-bold bg-gradient-to-r from-red-600 to-orange-500 bg-clip-text text-transparent">
+                                <span id="temp">--</span>°C
+                            </p>
+                        </div>
+                        <div class="bg-gradient-to-br from-red-100 to-red-200 p-6 rounded-2xl">
+                            <i class="fas fa-thermometer-half text-5xl text-red-600"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-2xl shadow-2xl p-6 border-l-4 border-blue-500 transform hover:scale-105 transition-all">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-sm font-semibold text-gray-500 uppercase mb-2">Humidity</p>
+                            <p class="text-5xl font-bold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
+                                <span id="humidity">--</span>%
+                            </p>
+                        </div>
+                        <div class="bg-gradient-to-br from-blue-100 to-blue-200 p-6 rounded-2xl">
+                            <i class="fas fa-tint text-5xl text-blue-600"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-2xl shadow-2xl p-6 border-l-4 border-yellow-600 transform hover:scale-105 transition-all">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-sm font-semibold text-gray-500 uppercase mb-2">Soil Moisture</p>
+                            <p class="text-5xl font-bold bg-gradient-to-r from-yellow-700 to-yellow-500 bg-clip-text text-transparent">
+                                <span id="soil">--</span>
+                            </p>
+                        </div>
+                        <div class="bg-gradient-to-br from-yellow-100 to-yellow-200 p-6 rounded-2xl">
+                            <i class="fas fa-seedling text-5xl text-yellow-700"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-2xl shadow-2xl p-6 border-l-4 border-yellow-400 transform hover:scale-105 transition-all">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-sm font-semibold text-gray-500 uppercase mb-2">Light System</p>
+                            <p class="text-3xl font-bold mt-2">
+                                <span id="light" class="px-6 py-3 rounded-xl bg-gray-200 text-gray-700 inline-block">--</span>
+                            </p>
+                        </div>
+                        <div class="bg-gradient-to-br from-yellow-100 to-yellow-200 p-6 rounded-2xl">
+                            <i class="fas fa-lightbulb text-5xl text-yellow-500"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-2xl shadow-2xl p-6 border-l-4 border-green-500 transform hover:scale-105 transition-all">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-sm font-semibold text-gray-500 uppercase mb-2">Water Pump</p>
+                            <p class="text-3xl font-bold mt-2">
+                                <span id="pump" class="px-6 py-3 rounded-xl bg-gray-200 text-gray-700 inline-block">--</span>
+                            </p>
+                        </div>
+                        <div class="bg-gradient-to-br from-green-100 to-green-200 p-6 rounded-2xl">
+                            <i class="fas fa-water text-5xl text-green-600"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-2xl shadow-2xl p-6 border-l-4 border-orange-400 transform hover:scale-105 transition-all">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-sm font-semibold text-gray-500 uppercase mb-2">Sunlight</p>
+                            <p class="text-5xl font-bold bg-gradient-to-r from-orange-600 to-yellow-500 bg-clip-text text-transparent">
+                                <span id="sunlight">--</span>
+                            </p>
+                        </div>
+                        <div class="bg-gradient-to-br from-orange-100 to-orange-200 p-6 rounded-2xl">
+                            <i class="fas fa-sun text-5xl text-orange-500 animate-spin-slow"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Device Control in Overview -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+                <div class="bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl shadow-2xl p-8 text-white">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 class="text-2xl font-bold mb-2"><i class="fas fa-lightbulb mr-2"></i>Light Control</h3>
+                            <p id="lightStatus" class="text-lg font-semibold">Status: --</p>
+                            <p id="lightMode" class="text-sm mt-1">Mode: --</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="lightToggle" class="sr-only peer">
+                            <div class="w-20 h-10 bg-white/30 peer-focus:ring-4 peer-focus:ring-yellow-300 rounded-full peer peer-checked:after:translate-x-10 peer-checked:after:border-white after:content-[''] after:absolute after:top-1 after:left-1 after:bg-white after:rounded-full after:h-8 after:w-8 after:transition-all peer-checked:bg-green-500"></div>
+                        </label>
+                    </div>
+                    <div class="flex gap-2">
+                        <button id="lightAutoBtn" class="flex-1 bg-white/20 hover:bg-white/30 py-2 px-4 rounded-lg font-semibold transition-all">
+                            <i class="fas fa-robot mr-1"></i>AUTO
+                        </button>
+                        <button id="lightManualBtn" class="flex-1 bg-white/20 hover:bg-white/30 py-2 px-4 rounded-lg font-semibold transition-all">
+                            <i class="fas fa-hand-pointer mr-1"></i>MANUAL
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="bg-gradient-to-br from-blue-400 to-cyan-500 rounded-2xl shadow-2xl p-8 text-white">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 class="text-2xl font-bold mb-2"><i class="fas fa-water mr-2"></i>Pump Control</h3>
+                            <p id="pumpStatus" class="text-lg font-semibold">Status: --</p>
+                            <p id="pumpMode" class="text-sm mt-1">Mode: --</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="pumpToggle" class="sr-only peer">
+                            <div class="w-20 h-10 bg-white/30 peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-10 peer-checked:after:border-white after:content-[''] after:absolute after:top-1 after:left-1 after:bg-white after:rounded-full after:h-8 after:w-8 after:transition-all peer-checked:bg-green-500"></div>
+                        </label>
+                    </div>
+                    <div class="flex gap-2">
+                        <button id="pumpAutoBtn" class="flex-1 bg-white/20 hover:bg-white/30 py-2 px-4 rounded-lg font-semibold transition-all">
+                            <i class="fas fa-robot mr-1"></i>AUTO
+                        </button>
+                        <button id="pumpManualBtn" class="flex-1 bg-white/20 hover:bg-white/30 py-2 px-4 rounded-lg font-semibold transition-all">
+                            <i class="fas fa-hand-pointer mr-1"></i>MANUAL
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Realtime Monitor Table -->
+            <div class="bg-white rounded-2xl shadow-2xl p-8 mb-12">
+                <h3 class="text-2xl font-bold text-gray-800 mb-6">
+                    <i class="fas fa-table text-purple-600 mr-2"></i>Realtime Data Monitor
+                </h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-gradient-to-r from-purple-100 to-blue-100">
+                                <th class="p-4 font-bold text-gray-700 border-b-2 border-purple-300">Display</th>
+                                <th class="p-4 font-bold text-gray-700 border-b-2 border-purple-300">Parameter</th>
+                                <th class="p-4 font-bold text-gray-700 border-b-2 border-purple-300">Current Value</th>
+                                <th class="p-4 font-bold text-gray-700 border-b-2 border-purple-300">Unit</th>
+                                <th class="p-4 font-bold text-gray-700 border-b-2 border-purple-300">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="monitorTableBody">
+                            <tr class="hover:bg-gray-50 transition-colors">
+                                <td class="p-4 border-b border-gray-200">
+                                    <input type="checkbox" id="showTemp" class="w-5 h-5 text-purple-600" checked>
+                                </td>
+                                <td class="p-4 border-b border-gray-200 font-semibold">
+                                    <i class="fas fa-thermometer-half text-red-500 mr-2"></i>Temperature
+                                </td>
+                                <td class="p-4 border-b border-gray-200 text-2xl font-bold text-red-600" id="monitorTemp">--</td>
+                                <td class="p-4 border-b border-gray-200">°C</td>
+                                <td class="p-4 border-b border-gray-200">
+                                    <span id="tempStatus" class="px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-800">Normal</span>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-gray-50 transition-colors">
+                                <td class="p-4 border-b border-gray-200">
+                                    <input type="checkbox" id="showHumidity" class="w-5 h-5 text-purple-600" checked>
+                                </td>
+                                <td class="p-4 border-b border-gray-200 font-semibold">
+                                    <i class="fas fa-tint text-blue-500 mr-2"></i>Humidity
+                                </td>
+                                <td class="p-4 border-b border-gray-200 text-2xl font-bold text-blue-600" id="monitorHumidity">--</td>
+                                <td class="p-4 border-b border-gray-200">%</td>
+                                <td class="p-4 border-b border-gray-200">
+                                    <span id="humidityStatus" class="px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-800">Normal</span>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-gray-50 transition-colors">
+                                <td class="p-4 border-b border-gray-200">
+                                    <input type="checkbox" id="showSoil" class="w-5 h-5 text-purple-600" checked>
+                                </td>
+                                <td class="p-4 border-b border-gray-200 font-semibold">
+                                    <i class="fas fa-seedling text-yellow-700 mr-2"></i>Soil Moisture
+                                </td>
+                                <td class="p-4 border-b border-gray-200 text-2xl font-bold text-yellow-700" id="monitorSoil">--</td>
+                                <td class="p-4 border-b border-gray-200">-</td>
+                                <td class="p-4 border-b border-gray-200">
+                                    <span id="soilStatus" class="px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-800">Normal</span>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-gray-50 transition-colors">
+                                <td class="p-4 border-b border-gray-200">
+                                    <input type="checkbox" id="showSun" class="w-5 h-5 text-purple-600">
+                                </td>
+                                <td class="p-4 border-b border-gray-200 font-semibold">
+                                    <i class="fas fa-sun text-orange-500 mr-2"></i>Sunlight
+                                </td>
+                                <td class="p-4 border-b border-gray-200 text-2xl font-bold text-orange-600" id="monitorSun">--</td>
+                                <td class="p-4 border-b border-gray-200">-</td>
+                                <td class="p-4 border-b border-gray-200">
+                                    <span id="sunStatus" class="px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-800">Normal</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+
+            
+            <!-- Analytics in Overview -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-gradient-to-br from-red-500 to-pink-600 rounded-2xl shadow-2xl p-8 text-white">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-thermometer-half text-4xl mr-4"></i>
+                        <div>
+                            <p class="text-sm opacity-90">Average Temperature (24h)</p>
+                            <p class="text-4xl font-bold"><span id="avgTemp">--</span>°C</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-gradient-to-br from-blue-500 to-cyan-600 rounded-2xl shadow-2xl p-8 text-white">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-tint text-4xl mr-4"></i>
+                        <div>
+                            <p class="text-sm opacity-90">Average Humidity (24h)</p>
+                            <p class="text-4xl font-bold"><span id="avgHumidity">--</span>%</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-gradient-to-br from-yellow-500 to-orange-600 rounded-2xl shadow-2xl p-8 text-white">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-seedling text-4xl mr-4"></i>
+                        <div>
+                            <p class="text-sm opacity-90">Average Soil (24h)</p>
+                            <p class="text-4xl font-bold"><span id="avgSoil">--</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SENSORS SECTION -->
+        <section id="sensors" class="scroll-section bg-gradient-to-br from-blue-50 to-green-50 rounded-3xl p-8 shadow-2xl">
+            <div class="mb-8">
+                <h2 class="text-5xl font-bold text-blue-900 mb-3">📈 Sensor Dashboard</h2>
+                <p class="text-gray-700 text-xl">Historical data and real-time charts</p>
+                <div class="h-1 w-32 bg-gradient-to-r from-blue-600 to-green-500 rounded-full mt-4"></div>
+            </div>
+            
+            <div class="bg-white rounded-2xl shadow-2xl p-8">
+                <h3 class="text-2xl font-bold text-gray-800 mb-4">
+                    <i class="fas fa-chart-area text-purple-600 mr-3"></i>Unified Sensor Monitor
+                </h3>
+                <div class="flex gap-4 mb-4 flex-wrap">
+                    <label class="flex items-center space-x-2 cursor-pointer px-4 py-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                        <input type="checkbox" id="showTempChartMain" class="w-5 h-5 text-red-600" checked>
+                        <span class="flex items-center">
+                            <span class="w-4 h-4 bg-red-500 rounded mr-2"></span>
+                            <span class="font-semibold text-gray-700">Temperature (°C)</span>
+                        </span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer px-4 py-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                        <input type="checkbox" id="showHumidityChartMain" class="w-5 h-5 text-blue-600" checked>
+                        <span class="flex items-center">
+                            <span class="w-4 h-4 bg-blue-500 rounded mr-2"></span>
+                            <span class="font-semibold text-gray-700">Humidity (%)</span>
+                        </span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer px-4 py-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                        <input type="checkbox" id="showSoilChartMain" class="w-5 h-5 text-yellow-600" checked>
+                        <span class="flex items-center">
+                            <span class="w-4 h-4 bg-yellow-500 rounded mr-2"></span>
+                            <span class="font-semibold text-gray-700">Soil Moisture</span>
+                        </span>
+                    </label>
+                </div>
+                <div class="chart-container-large">
+                    <canvas id="unifiedChartMain"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- CONTROL SECTION -->
+        <section id="control" class="scroll-section bg-gradient-to-br from-green-50 to-yellow-50 rounded-3xl p-8 shadow-2xl">
+            <div class="mb-8">
+                <h2 class="text-5xl font-bold text-green-900 mb-3">🎮 Control Panel</h2>
+                <p class="text-gray-700 text-xl">Device management and automation</p>
+                <div class="h-1 w-32 bg-gradient-to-r from-green-600 to-yellow-500 rounded-full mt-4"></div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                <div class="bg-white rounded-2xl shadow-2xl p-8">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <h3 class="text-3xl font-bold text-gray-800 mb-2">
+                                <i class="fas fa-lightbulb text-yellow-500 mr-3"></i>Light System
+                            </h3>
+                            <p class="text-lg text-gray-600">Control greenhouse lighting</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="lightToggleMain" class="sr-only peer">
+                            <div class="w-24 h-12 bg-gray-300 peer-focus:ring-4 peer-focus:ring-yellow-300 rounded-full peer peer-checked:after:translate-x-12 peer-checked:after:border-white after:content-[''] after:absolute after:top-1 after:left-1 after:bg-white after:rounded-full after:h-10 after:w-10 after:transition-all peer-checked:bg-yellow-500"></div>
+                        </label>
+                    </div>
+                    <div class="bg-gradient-to-r from-yellow-100 to-orange-100 rounded-xl p-4 mb-4">
+                        <p class="text-gray-700 font-semibold">Status: <span id="lightStatusMain" class="text-xl">--</span></p>
+                        <p class="text-gray-600 text-sm mt-1">Mode: <span id="lightModeMain" class="font-semibold">--</span></p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button id="lightAutoBtnMain" class="flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white py-3 px-4 rounded-lg font-bold transition-all shadow-lg">
+                            <i class="fas fa-robot mr-2"></i>AUTO
+                        </button>
+                        <button id="lightManualBtnMain" class="flex-1 bg-gradient-to-r from-gray-400 to-gray-500 hover:from-gray-500 hover:to-gray-600 text-white py-3 px-4 rounded-lg font-bold transition-all shadow-lg">
+                            <i class="fas fa-hand-pointer mr-2"></i>MANUAL
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-2xl shadow-2xl p-8">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <h3 class="text-3xl font-bold text-gray-800 mb-2">
+                                <i class="fas fa-water text-blue-600 mr-3"></i>Water Pump
+                            </h3>
+                            <p class="text-lg text-gray-600">Control irrigation system</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="pumpToggleMain" class="sr-only peer">
+                            <div class="w-24 h-12 bg-gray-300 peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-12 peer-checked:after:border-white after:content-[''] after:absolute after:top-1 after:left-1 after:bg-white after:rounded-full after:h-10 after:w-10 after:transition-all peer-checked:bg-blue-500"></div>
+                        </label>
+                    </div>
+                    <div class="bg-gradient-to-r from-blue-100 to-cyan-100 rounded-xl p-4 mb-4">
+                        <p class="text-gray-700 font-semibold">Status: <span id="pumpStatusMain" class="text-xl">--</span></p>
+                        <p class="text-gray-600 text-sm mt-1">Mode: <span id="pumpModeMain" class="font-semibold">--</span></p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button id="pumpAutoBtnMain" class="flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white py-3 px-4 rounded-lg font-bold transition-all shadow-lg">
+                            <i class="fas fa-robot mr-2"></i>AUTO
+                        </button>
+                        <button id="pumpManualBtnMain" class="flex-1 bg-gradient-to-r from-gray-400 to-gray-500 hover:from-gray-500 hover:to-gray-600 text-white py-3 px-4 rounded-lg font-bold transition-all shadow-lg">
+                            <i class="fas fa-hand-pointer mr-2"></i>MANUAL
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-2xl shadow-2xl p-8">
+                <h3 class="text-2xl font-bold text-gray-800 mb-4">
+                    <i class="fas fa-history text-purple-600 mr-2"></i>Control History
+                </h3>
+                <div id="controlLog" class="space-y-2 max-h-64 overflow-y-auto">
+                    <p class="text-gray-500 italic">No control actions yet...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ANALYTICS SECTION -->
+        <section id="analytics" class="scroll-section bg-gradient-to-br from-purple-50 to-pink-50 rounded-3xl p-8 shadow-2xl">
+            <div class="mb-8">
+                <h2 class="text-5xl font-bold text-purple-900 mb-3">📊 Analytics</h2>
+                <p class="text-gray-700 text-xl">Data insights and statistics</p>
+                <div class="h-1 w-32 bg-gradient-to-r from-purple-600 to-pink-500 rounded-full mt-4"></div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+                <div class="bg-white rounded-2xl shadow-2xl p-8 border-t-4 border-purple-500">
+                    <div class="text-center">
+                        <i class="fas fa-chart-line text-6xl text-purple-600 mb-4"></i>
+                        <p class="text-gray-600 text-sm uppercase mb-2">Total Readings (24h)</p>
+                        <p class="text-5xl font-bold text-gray-800"><span id="totalReadings">0</span></p>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-2xl shadow-2xl p-8 border-t-4 border-blue-500">
+                    <div class="text-center">
+                        <i class="fas fa-sync-alt text-6xl text-blue-600 mb-4"></i>
+                        <p class="text-gray-600 text-sm uppercase mb-2">Update Frequency</p>
+                        <p class="text-5xl font-bold text-gray-800">5s</p>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-2xl shadow-2xl p-8 border-t-4 border-green-500">
+                    <div class="text-center">
+                        <i class="fas fa-check-circle text-6xl text-green-600 mb-4"></i>
+                        <p class="text-gray-600 text-sm uppercase mb-2">System Health</p>
+                        <p class="text-5xl font-bold text-green-600">100%</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-2xl shadow-2xl p-8">
+                <h3 class="text-2xl font-bold text-gray-800 mb-6">
+                    <i class="fas fa-exclamation-triangle text-yellow-600 mr-2"></i>System Alerts
+                </h3>
+                <div id="systemAlerts" class="space-y-4">
+                    <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded">
+                        <p class="font-semibold text-green-800">✓ All systems operational</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- AI DETECTION SECTION -->
+        <section id="ai" class="scroll-section bg-gradient-to-br from-indigo-50 to-purple-50 rounded-3xl p-8 shadow-2xl">
+            <div class="mb-8">
+                <h2 class="text-5xl font-bold text-indigo-900 mb-3">🧠 AI Plant Disease Detection</h2>
+                <p class="text-gray-700 text-xl">Upload plant images for instant analysis</p>
+                <div class="h-1 w-32 bg-gradient-to-r from-indigo-600 to-purple-500 rounded-full mt-4"></div>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="bg-white rounded-2xl shadow-2xl p-8">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-6">
+                        <i class="fas fa-upload text-indigo-600 mr-2"></i>Upload Image
+                    </h3>
+                    
+                    <div class="border-4 border-dashed border-gray-300 rounded-2xl p-8 text-center hover:border-indigo-500 transition-all cursor-pointer">
+                        <input type="file" id="plantImageInput" accept="image/*" class="hidden">
+                        <label for="plantImageInput" class="cursor-pointer">
+                            <i class="fas fa-cloud-upload-alt text-6xl text-gray-400 mb-4"></i>
+                            <p class="text-gray-600 text-lg">Click or drag image here</p>
+                            <p class="text-gray-400 text-sm mt-2">Supports JPG, PNG</p>
+                        </label>
+                    </div>
+                    
+                    <div id="imagePreview" class="mt-6 hidden">
+                        <img id="previewImg" class="w-full rounded-xl shadow-lg">
+                    </div>
+                    
+                    <button id="analyzeBtn" class="w-full mt-6 bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-4 rounded-xl font-bold text-lg hover:shadow-2xl transform hover:scale-105 transition-all" disabled>
+                        <i class="fas fa-brain mr-2"></i>Analyze with AI
+                    </button>
+                </div>
+                
+                <div class="bg-white rounded-2xl shadow-2xl p-8">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-6">
+                        <i class="fas fa-microscope text-purple-600 mr-2"></i>Analysis Result
+                    </h3>
+                    
+                    <div id="analysisResult" class="text-center text-gray-400 py-12">
+                        <i class="fas fa-search text-6xl mb-4"></i>
+                        <p class="text-lg">Upload an image to start analysis</p>
+                    </div>
+                    
+                    <div id="diseaseInfo" class="hidden">
+                        <div class="bg-gradient-to-r from-indigo-100 to-purple-100 rounded-xl p-6 mb-6">
+                            <p class="text-sm text-gray-600 mb-2">Detected Disease:</p>
+                            <p id="diseaseName" class="text-3xl font-bold text-indigo-900"></p>
+                            <p id="diseaseConfidence" class="text-xl text-purple-700 mt-2"></p>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <h4 class="font-bold text-gray-800 mb-2"><i class="fas fa-info-circle text-blue-500 mr-2"></i>Description</h4>
+                                <p id="diseaseDescription" class="text-gray-600"></p>
+                            </div>
+                            
+                            <div>
+                                <h4 class="font-bold text-gray-800 mb-2"><i class="fas fa-prescription text-green-500 mr-2"></i>Treatment</h4>
+                                <p id="diseaseTreatment" class="text-gray-600"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SYSTEM INFO SECTION -->
+        <section id="system" class="scroll-section bg-gradient-to-br from-gray-50 to-blue-50 rounded-3xl p-8 shadow-2xl">
+            <div class="mb-8">
+                <h2 class="text-5xl font-bold text-gray-900 mb-3">⚙️ System Information</h2>
+                <p class="text-gray-700 text-xl">Technical details and configuration</p>
+                <div class="h-1 w-32 bg-gradient-to-r from-gray-600 to-blue-500 rounded-full mt-4"></div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white rounded-2xl shadow-2xl p-8">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-6">
+                        <i class="fas fa-database text-blue-600 mr-2"></i>Firebase Configuration
+                    </h3>
+                    <div class="space-y-3 text-gray-700">
+                        <p><strong>Database:</strong> Firebase Realtime Database</p>
+                        <p><strong>Region:</strong> Asia Southeast 1 (Singapore)</p>
+                        <p><strong>Status:</strong> <span id="dbStatus" class="text-green-600 font-semibold">Connected</span></p>
+                        <p><strong>Last Sync:</strong> <span id="lastSync">--</span></p>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-2xl shadow-2xl p-8">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-6">
+                        <i class="fas fa-microchip text-green-600 mr-2"></i>IoT Sensors
+                    </h3>
+                    <div class="space-y-3 text-gray-700">
+                        <p><i class="fas fa-thermometer-half text-red-500 mr-2"></i>DHT11 Temperature Sensor</p>
+                        <p><i class="fas fa-tint text-blue-500 mr-2"></i>DHT11 Humidity Sensor</p>
+                        <p><i class="fas fa-seedling text-yellow-600 mr-2"></i>Soil Moisture Sensor</p>
+                        <p><i class="fas fa-sun text-orange-500 mr-2"></i>Light Intensity Sensor</p>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-2xl shadow-2xl p-8 md:col-span-2">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-6">
+                        <i class="fas fa-code text-purple-600 mr-2"></i>Technology Stack
+                    </h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="text-center p-4 bg-blue-50 rounded-xl">
+                            <i class="fab fa-html5 text-4xl text-orange-600 mb-2"></i>
+                            <p class="font-semibold text-gray-800">HTML5</p>
+                        </div>
+                        <div class="text-center p-4 bg-blue-50 rounded-xl">
+                            <i class="fab fa-css3-alt text-4xl text-blue-600 mb-2"></i>
+                            <p class="font-semibold text-gray-800">Tailwind CSS</p>
+                        </div>
+                        <div class="text-center p-4 bg-blue-50 rounded-xl">
+                            <i class="fab fa-js-square text-4xl text-yellow-500 mb-2"></i>
+                            <p class="font-semibold text-gray-800">JavaScript ES6</p>
+                        </div>
+                        <div class="text-center p-4 bg-blue-50 rounded-xl">
+                            <i class="fas fa-chart-bar text-4xl text-green-600 mb-2"></i>
+                            <p class="font-semibold text-gray-800">Chart.js</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Import Firebase SDKs
+        import { loadPlantModel, predictDisease } from './js/ai-detection.js';
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getDatabase, ref, onValue, set, update } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+        import { getAnalytics } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js';
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAH10hJQcfzTIR_0R6Mjqx6Kj10VPC4wW8",
+            authDomain: "hethonggiamsatnhakinh.firebaseapp.com",
+            databaseURL: "https://hethonggiamsatnhakinh-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "hethonggiamsatnhakinh",
+            storageBucket: "hethonggiamsatnhakinh.firebasestorage.app",
+            messagingSenderId: "131487040363",
+            appId: "1:131487040363:web:ef515100d1bb1eefc1822e",
+            measurementId: "G-EWFBQ32YQY"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const database = getDatabase(app);
+
+        // Global variables
+        let unifiedChart;
+        let sensorData = {
+            temperature: [],
+            humidity: [],
+            soil: [],
+            soil_normalized: [], // Soil data normalized to 0-100 scale
+            timestamps: []
+        };
+        let deviceModes = {
+            light: 'auto',
+            pump: 'auto'
+        };
+        let isFirstLoad = true;
+        
+        // Demo data
+        const demoData = {
+            temp: 26.5,
+            humidity: 65,
+            soil_hum: 2.3,
+            sun: 1,
+            light: true,
+            pump: false,
+            light_mode: 'auto',
+            pump_mode: 'auto'
+        };
+
+        // Update connection status
+        function updateConnectionStatus(connected) {
+            const statusDot = document.getElementById('connectionStatus');
+            const statusText = document.getElementById('connectionText');
+            
+            if (connected) {
+                statusDot.className = 'h-3 w-3 rounded-full bg-green-500 animate-pulse';
+                statusText.textContent = 'Connected';
+            } else {
+                statusDot.className = 'h-3 w-3 rounded-full bg-red-500 animate-pulse';
+                statusText.textContent = 'Disconnected';
+            }
+        }
+
+        // Initialize Charts
+        function initCharts() {
+            const chartConfig = {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [
+                        {
+                            label: 'Temperature (°C)',
+                            data: [],
+                            borderColor: 'rgb(239, 68, 68)',
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            tension: 0.4,
+                            borderWidth: 2,
+                            pointRadius: 3,
+                            pointHoverRadius: 5
+                        },
+                        {
+                            label: 'Humidity (%)',
+                            data: [],
+                            borderColor: 'rgb(59, 130, 246)',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            tension: 0.4,
+                            borderWidth: 2,
+                            pointRadius: 3,
+                            pointHoverRadius: 5
+                        },
+                        {
+                            label: 'Soil Moisture (Normalized)',
+                            data: [],
+                            borderColor: 'rgb(234, 179, 8)',
+                            backgroundColor: 'rgba(234, 179, 8, 0.1)',
+                            tension: 0.4,
+                            borderWidth: 2,
+                            pointRadius: 3,
+                            pointHoverRadius: 5
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 0
+                    },
+                    plugins: {
+                        legend: { 
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                font: {
+                                    size: 12,
+                                    weight: 'bold'
+                                },
+                                usePointStyle: true,
+                                padding: 15
+                            }
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += context.parsed.y.toFixed(1);
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: { 
+                            beginAtZero: true,
+                            min: 0,
+                            max: 100,
+                            ticks: {
+                                font: {
+                                    size: 11
+                                },
+                                callback: function(value) {
+                                    return value;
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                font: {
+                                    size: 10
+                                },
+                                maxRotation: 0,
+                                autoSkip: true,
+                                maxTicksLimit: 10
+                            },
+                            grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    interaction: {
+                        mode: 'nearest',
+                        axis: 'x',
+                        intersect: false
+                    }
+                }
+            };
+
+            // Unified Chart (Sensors Section)
+            const unifiedCtx = document.getElementById('unifiedChartMain');
+            if (unifiedCtx) {
+                unifiedChart = new Chart(unifiedCtx, JSON.parse(JSON.stringify(chartConfig)));
+            }
+        }
+
+        // Update charts with new data
+        let lastChartUpdate = 0;
+        const CHART_UPDATE_INTERVAL = 2000; // Update every 2 seconds
+        
+        function updateCharts(timestamp, temp, humidity, soil) {
+            // Throttle chart updates
+            const now = Date.now();
+            if (now - lastChartUpdate < CHART_UPDATE_INTERVAL) {
+                return;
+            }
+            lastChartUpdate = now;
+            
+            const maxDataPoints = 20;
+            
+            // Normalize soil moisture to 0-100 scale (assuming soil range is 0-5)
+            const soilNormalized = (soil / 5) * 100;
+            
+            // Add new data
+            sensorData.timestamps.push(timestamp);
+            sensorData.temperature.push(temp);
+            sensorData.humidity.push(humidity);
+            sensorData.soil.push(soil);
+            sensorData.soil_normalized.push(soilNormalized);
+
+            // Keep only last maxDataPoints
+            if (sensorData.timestamps.length > maxDataPoints) {
+                sensorData.timestamps.shift();
+                sensorData.temperature.shift();
+                sensorData.humidity.shift();
+                sensorData.soil.shift();
+                sensorData.soil_normalized.shift();
+            }
+
+            // Update unified chart
+            updateUnifiedChart(unifiedChart);
+        }
+        
+        // Update unified chart
+        function updateUnifiedChart(chart) {
+            if (!chart) return;
+            
+            chart.data.labels = sensorData.timestamps;
+            chart.data.datasets[0].data = sensorData.temperature;
+            chart.data.datasets[1].data = sensorData.humidity;
+            chart.data.datasets[2].data = sensorData.soil_normalized;
+            chart.update('none');
+        }
+
+        // Calculate averages
+        function updateAverages() {
+            const avg = (arr) => arr.length ? (arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(1) : '--';
+            
+            document.getElementById('avgTemp').textContent = avg(sensorData.temperature);
+            document.getElementById('avgHumidity').textContent = avg(sensorData.humidity);
+            document.getElementById('avgSoil').textContent = avg(sensorData.soil);
+            document.getElementById('totalReadings').textContent = sensorData.timestamps.length;
+        }
+
+        // Format timestamp
+        function formatTime(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        // Listen to sensor data
+        function listenToSensorData() {
+            // Load demo data first
+            if (isFirstLoad) {
+                console.log('Loading demo data...');
+                updateAllData(demoData);
+                isFirstLoad = false;
+            }
+            
+            const sensorsRef = ref(database, '/');
+            
+            onValue(sensorsRef, (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    console.log('Receiving real data from Firebase...');
+                    updateConnectionStatus(true);
+                    updateAllData(data);
+                }
+            }, (error) => {
+                console.error('Error reading data:', error);
+                updateConnectionStatus(false);
+            });
+        }
+        
+        // Update all data display
+        function updateAllData(data) {
+            // Store data globally for checkbox updates
+            window.lastSensorData = data;
+            
+            // Update current values
+            document.getElementById('temp').textContent = data.temp || '--';
+            document.getElementById('humidity').textContent = data.humidity || '--';
+            document.getElementById('soil').textContent = data.soil_hum || '--';
+            
+            // Format sunlight display
+            const sunVal = data.sun;
+            const sunDisplay = sunVal == 1 ? '☀️ Day' : sunVal == 0 ? '🌙 Night' : '--';
+            document.getElementById('sunlight').textContent = sunDisplay;
+            
+            // Update monitor table
+            updateMonitorTable(data);
+            
+            // Update charts
+            const timestamp = formatTime(Date.now());
+            updateCharts(
+                timestamp,
+                parseFloat(data.temp) || 0,
+                parseFloat(data.humidity) || 0,
+                parseFloat(data.soil_hum) || 0
+            );
+            
+            updateAverages();
+            
+            // Update last sync time
+            document.getElementById('lastSync').textContent = new Date().toLocaleTimeString();
+            
+            // Update device status from same data
+            const lightOn = data.light === true || data.light === 1 || data.light === 'ON';
+            const pumpOn = data.pump === true || data.pump === 1 || data.pump === 'ON';
+            updateDeviceUI('light', lightOn);
+            updateDeviceUI('pump', pumpOn);
+            
+            // Update modes
+            if (data.light_mode) {
+                deviceModes.light = data.light_mode;
+                updateModeUI('light', data.light_mode);
+            }
+            if (data.pump_mode) {
+                deviceModes.pump = data.pump_mode;
+                updateModeUI('pump', data.pump_mode);
+            }
+        }
+        
+        // Update monitor table
+        function updateMonitorTable(data) {
+            const showTemp = document.getElementById('showTemp')?.checked ?? true;
+            const showHumidity = document.getElementById('showHumidity')?.checked ?? true;
+            const showSoil = document.getElementById('showSoil')?.checked ?? true;
+            const showSun = document.getElementById('showSun')?.checked ?? false;
+            
+            if (showTemp) {
+                const tempVal = data.temp || '--';
+                document.getElementById('monitorTemp').textContent = tempVal;
+                if (tempVal !== '--') updateParameterStatus('temp', parseFloat(tempVal));
+            } else {
+                document.getElementById('monitorTemp').textContent = '---';
+                document.getElementById('tempStatus').textContent = 'Hidden';
+                document.getElementById('tempStatus').className = 'px-3 py-1 rounded-full text-sm font-semibold bg-gray-100 text-gray-600';
+            }
+            
+            if (showHumidity) {
+                const humVal = data.humidity || '--';
+                document.getElementById('monitorHumidity').textContent = humVal;
+                if (humVal !== '--') updateParameterStatus('humidity', parseFloat(humVal));
+            } else {
+                document.getElementById('monitorHumidity').textContent = '---';
+                document.getElementById('humidityStatus').textContent = 'Hidden';
+                document.getElementById('humidityStatus').className = 'px-3 py-1 rounded-full text-sm font-semibold bg-gray-100 text-gray-600';
+            }
+            
+            if (showSoil) {
+                const soilVal = data.soil_hum || '--';
+                document.getElementById('monitorSoil').textContent = soilVal;
+                if (soilVal !== '--') updateParameterStatus('soil', parseFloat(soilVal));
+            } else {
+                document.getElementById('monitorSoil').textContent = '---';
+                document.getElementById('soilStatus').textContent = 'Hidden';
+                document.getElementById('soilStatus').className = 'px-3 py-1 rounded-full text-sm font-semibold bg-gray-100 text-gray-600';
+            }
+            
+            if (showSun) {
+                const sunVal = data.sun;
+                const sunText = sunVal == 1 ? 'Day (Ngày)' : sunVal == 0 ? 'Night (Đêm)' : '--';
+                document.getElementById('monitorSun').textContent = sunText;
+                if (sunVal !== undefined && sunVal !== null && sunVal !== '--') {
+                    updateParameterStatus('sun', parseFloat(sunVal));
+                }
+            } else {
+                document.getElementById('monitorSun').textContent = '---';
+                document.getElementById('sunStatus').textContent = 'Hidden';
+                document.getElementById('sunStatus').className = 'px-3 py-1 rounded-full text-sm font-semibold bg-gray-100 text-gray-600';
+            }
+        }
+        
+        // Update parameter status
+        function updateParameterStatus(param, value) {
+            let statusElem, statusText, statusClass;
+            
+            switch(param) {
+                case 'temp':
+                    statusElem = document.getElementById('tempStatus');
+                    if (value < 20) {
+                        statusText = 'Low';
+                        statusClass = 'bg-blue-100 text-blue-800';
+                    } else if (value > 35) {
+                        statusText = 'High';
+                        statusClass = 'bg-red-100 text-red-800';
+                    } else {
+                        statusText = 'Normal';
+                        statusClass = 'bg-green-100 text-green-800';
+                    }
+                    break;
+                case 'humidity':
+                    statusElem = document.getElementById('humidityStatus');
+                    if (value < 40) {
+                        statusText = 'Low';
+                        statusClass = 'bg-yellow-100 text-yellow-800';
+                    } else if (value > 80) {
+                        statusText = 'High';
+                        statusClass = 'bg-blue-100 text-blue-800';
+                    } else {
+                        statusText = 'Normal';
+                        statusClass = 'bg-green-100 text-green-800';
+                    }
+                    break;
+                case 'soil':
+                    statusElem = document.getElementById('soilStatus');
+                    if (value < 1) {
+                        statusText = 'Dry';
+                        statusClass = 'bg-red-100 text-red-800';
+                    } else if (value > 3) {
+                        statusText = 'Wet';
+                        statusClass = 'bg-blue-100 text-blue-800';
+                    } else {
+                        statusText = 'Normal';
+                        statusClass = 'bg-green-100 text-green-800';
+                    }
+                    break;
+                case 'sun':
+                    statusElem = document.getElementById('sunStatus');
+                    if (value == 1) {
+                        statusText = '☀️ Daytime';
+                        statusClass = 'bg-yellow-100 text-yellow-800';
+                    } else if (value == 0) {
+                        statusText = '🌙 Nighttime';
+                        statusClass = 'bg-indigo-100 text-indigo-800';
+                    } else {
+                        statusText = 'Unknown';
+                        statusClass = 'bg-gray-100 text-gray-800';
+                    }
+                    break;
+            }
+            
+            if (statusElem) {
+                statusElem.textContent = statusText;
+                statusElem.className = `px-3 py-1 rounded-full text-sm font-semibold ${statusClass}`;
+            }
+        }
+
+
+
+        // Update mode UI
+        function updateModeUI(device, mode) {
+            const modeElements = {
+                light: ['lightMode', 'lightModeMain'],
+                pump: ['pumpMode', 'pumpModeMain']
+            };
+            
+            const buttons = {
+                light: {
+                    auto: ['lightAutoBtn', 'lightAutoBtnMain'],
+                    manual: ['lightManualBtn', 'lightManualBtnMain']
+                },
+                pump: {
+                    auto: ['pumpAutoBtn', 'pumpAutoBtnMain'],
+                    manual: ['pumpManualBtn', 'pumpManualBtnMain']
+                }
+            };
+            
+            // Update mode text
+            if (modeElements[device]) {
+                modeElements[device].forEach(id => {
+                    const elem = document.getElementById(id);
+                    if (elem) {
+                        elem.textContent = `Mode: ${mode.toUpperCase()}`;
+                    }
+                });
+            }
+            
+            // Update button styles
+            if (buttons[device]) {
+                // Auto buttons
+                buttons[device].auto.forEach(id => {
+                    const btn = document.getElementById(id);
+                    if (btn) {
+                        if (mode === 'auto') {
+                            btn.className = btn.className.replace(/from-gray-\d+|to-gray-\d+/g, '');
+                            btn.className = btn.className.replace(/bg-gradient-to-r/, 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700');
+                        } else {
+                            btn.className = btn.className.replace(/from-green-\d+|to-green-\d+/g, '');
+                            btn.className = btn.className.replace(/bg-gradient-to-r/, 'bg-gradient-to-r from-gray-400 to-gray-500 hover:from-gray-500 hover:to-gray-600');
+                        }
+                    }
+                });
+                
+                // Manual buttons
+                buttons[device].manual.forEach(id => {
+                    const btn = document.getElementById(id);
+                    if (btn) {
+                        if (mode === 'manual') {
+                            btn.className = btn.className.replace(/from-gray-\d+|to-gray-\d+/g, '');
+                            btn.className = btn.className.replace(/bg-gradient-to-r/, 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700');
+                        } else {
+                            btn.className = btn.className.replace(/from-blue-\d+|to-blue-\d+/g, '');
+                            btn.className = btn.className.replace(/bg-gradient-to-r/, 'bg-gradient-to-r from-gray-400 to-gray-500 hover:from-gray-500 hover:to-gray-600');
+                        }
+                    }
+                });
+            }
+            
+            // Enable/disable toggles based on mode
+            const toggles = device === 'light' ? ['lightToggle', 'lightToggleMain'] : ['pumpToggle', 'pumpToggleMain'];
+            toggles.forEach(id => {
+                const toggle = document.getElementById(id);
+                if (toggle) {
+                    toggle.disabled = (mode === 'auto');
+                    toggle.parentElement.style.opacity = (mode === 'auto') ? '0.5' : '1';
+                }
+            });
+        }
+        
+        // Set device mode
+        function setDeviceMode(device, mode) {
+            const deviceRef = ref(database, '/');
+            const modeField = `${device}_mode`;
+            
+            update(deviceRef, {
+                [modeField]: mode
+            }).then(() => {
+                console.log(`${device} mode set to ${mode}`);
+                deviceModes[device] = mode;
+                updateModeUI(device, mode);
+                addControlLog(device, `Mode changed to ${mode.toUpperCase()}`);
+            }).catch((error) => {
+                console.error(`Error setting ${device} mode:`, error);
+                alert(`Failed to set ${device} mode. Please try again.`);
+            });
+        }
+        
+        // Update device UI
+        function updateDeviceUI(device, isOn) {
+            const status = isOn ? 'ON' : 'OFF';
+            const statusClass = isOn ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-700';
+            
+            // Update all device elements
+            const elements = {
+                light: {
+                    toggle: ['lightToggle', 'lightToggleMain'],
+                    status: ['lightStatus', 'lightStatusMain', 'light'],
+                    displayStatus: ['lightStatus', 'lightStatusMain']
+                },
+                pump: {
+                    toggle: ['pumpToggle', 'pumpToggleMain'],
+                    status: ['pumpStatus', 'pumpStatusMain', 'pump'],
+                    displayStatus: ['pumpStatus', 'pumpStatusMain']
+                }
+            };
+            
+            if (elements[device]) {
+                // Update toggles
+                elements[device].toggle.forEach(id => {
+                    const toggle = document.getElementById(id);
+                    if (toggle) toggle.checked = isOn;
+                });
+                
+                // Update status displays
+                elements[device].status.forEach(id => {
+                    const elem = document.getElementById(id);
+                    if (elem) {
+                        elem.textContent = status;
+                        elem.className = `px-6 py-3 rounded-xl ${statusClass} inline-block`;
+                    }
+                });
+                
+                // Update text-only status
+                elements[device].displayStatus.forEach(id => {
+                    const elem = document.getElementById(id);
+                    if (elem && elem.tagName !== 'SPAN') {
+                        elem.textContent = `Status: ${status}`;
+                    }
+                });
+            }
+        }
+
+        // Control devices
+        function controlDevice(device, state) {
+            const deviceRef = ref(database, '/');
+            
+            update(deviceRef, {
+                [device]: state
+            }).then(() => {
+                console.log(`${device} set to ${state}`);
+                addControlLog(device, state ? 'ON' : 'OFF');
+            }).catch((error) => {
+                console.error(`Error controlling ${device}:`, error);
+                alert(`Failed to control ${device}. Please try again.`);
+            });
+        }
+
+        // Add control log entry
+        function addControlLog(device, state) {
+            const logContainer = document.getElementById('controlLog');
+            if (!logContainer) return;
+            
+            // Remove "no actions" message
+            const emptyMsg = logContainer.querySelector('.italic');
+            if (emptyMsg) emptyMsg.remove();
+            
+            const timestamp = new Date().toLocaleTimeString();
+            const icon = device === 'light' ? 'fa-lightbulb' : 'fa-water';
+            const color = state === 'ON' ? 'green' : 'gray';
+            
+            const logEntry = document.createElement('div');
+            logEntry.className = `bg-${color}-50 border-l-4 border-${color}-500 p-3 rounded`;
+            logEntry.innerHTML = `
+                <p class="text-sm">
+                    <i class="fas ${icon} mr-2"></i>
+                    <strong>${device.toUpperCase()}</strong> turned <strong>${state}</strong>
+                    <span class="text-gray-500 float-right">${timestamp}</span>
+                </p>
+            `;
+            
+            logContainer.insertBefore(logEntry, logContainer.firstChild);
+            
+            // Keep only last 10 logs
+            while (logContainer.children.length > 10) {
+                logContainer.removeChild(logContainer.lastChild);
+            }
+        }
+
+        // Setup control listeners
+        function setupControls() {
+            // Light controls
+            ['lightToggle', 'lightToggleMain'].forEach(id => {
+                const toggle = document.getElementById(id);
+                if (toggle) {
+                    toggle.addEventListener('change', (e) => {
+                        if (deviceModes.light === 'manual') {
+                            controlDevice('light', e.target.checked);
+                        } else {
+                            e.preventDefault();
+                            toggle.checked = !e.target.checked;
+                        }
+                    });
+                }
+            });
+            
+            // Pump controls
+            ['pumpToggle', 'pumpToggleMain'].forEach(id => {
+                const toggle = document.getElementById(id);
+                if (toggle) {
+                    toggle.addEventListener('change', (e) => {
+                        if (deviceModes.pump === 'manual') {
+                            controlDevice('pump', e.target.checked);
+                        } else {
+                            e.preventDefault();
+                            toggle.checked = !e.target.checked;
+                        }
+                    });
+                }
+            });
+            
+            // Light mode buttons
+            ['lightAutoBtn', 'lightAutoBtnMain'].forEach(id => {
+                const btn = document.getElementById(id);
+                if (btn) {
+                    btn.addEventListener('click', () => setDeviceMode('light', 'auto'));
+                }
+            });
+            
+            ['lightManualBtn', 'lightManualBtnMain'].forEach(id => {
+                const btn = document.getElementById(id);
+                if (btn) {
+                    btn.addEventListener('click', () => setDeviceMode('light', 'manual'));
+                }
+            });
+            
+            // Pump mode buttons
+            ['pumpAutoBtn', 'pumpAutoBtnMain'].forEach(id => {
+                const btn = document.getElementById(id);
+                if (btn) {
+                    btn.addEventListener('click', () => setDeviceMode('pump', 'auto'));
+                }
+            });
+            
+            ['pumpManualBtn', 'pumpManualBtnMain'].forEach(id => {
+                const btn = document.getElementById(id);
+                if (btn) {
+                    btn.addEventListener('click', () => setDeviceMode('pump', 'manual'));
+                }
+            });
+            
+            // Monitor table checkboxes
+            ['showTemp', 'showHumidity', 'showSoil', 'showSun'].forEach(id => {
+                const checkbox = document.getElementById(id);
+                if (checkbox) {
+                    checkbox.addEventListener('change', () => {
+                        // Re-render monitor table with stored data
+                        if (window.lastSensorData) {
+                            updateMonitorTable(window.lastSensorData);
+                        }
+                    });
+                }
+            });
+            
+            // Chart toggles for Sensors Section
+            setupChartToggles('showTempChartMain', 'showHumidityChartMain', 'showSoilChartMain', unifiedChart);
+        }
+        
+        // Setup chart toggle checkboxes
+        function setupChartToggles(tempId, humidityId, soilId, chart) {
+            const tempCheckbox = document.getElementById(tempId);
+            const humidityCheckbox = document.getElementById(humidityId);
+            const soilCheckbox = document.getElementById(soilId);
+            
+            if (tempCheckbox && chart) {
+                tempCheckbox.addEventListener('change', (e) => {
+                    chart.data.datasets[0].hidden = !e.target.checked;
+                    chart.update();
+                });
+            }
+            
+            if (humidityCheckbox && chart) {
+                humidityCheckbox.addEventListener('change', (e) => {
+                    chart.data.datasets[1].hidden = !e.target.checked;
+                    chart.update();
+                });
+            }
+            
+            if (soilCheckbox && chart) {
+                soilCheckbox.addEventListener('change', (e) => {
+                    chart.data.datasets[2].hidden = !e.target.checked;
+                    chart.update();
+                });
+            }
+        }
+        
+        // AI Detection setup
+       async function setupAIDetection() {
+    const imageInput = document.getElementById('plantImageInput');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    const imagePreview = document.getElementById('imagePreview');
+    const previewImg = document.getElementById('previewImg');
+    
+    // Tải model ngay khi setup
+    await loadPlantModel();
+
+    if (imageInput) {
+        imageInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    previewImg.src = event.target.result;
+                    imagePreview.classList.remove('hidden');
+                    analyzeBtn.disabled = false;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+    if (analyzeBtn) {
+        analyzeBtn.addEventListener('click', async () => {
+            // UI Loading
+            analyzeBtn.disabled = true;
+            analyzeBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Đang chạy AI...';
+            
+            const resultArea = document.getElementById('analysisResult');
+            const infoArea = document.getElementById('diseaseInfo');
+            
+            resultArea.classList.remove('hidden');
+            resultArea.innerHTML = `<div class="text-center py-12"><i class="fas fa-brain fa-spin text-6xl text-indigo-600 mb-4"></i><p>Hệ thống đang phân tích bằng Model thực tế...</p></div>`;
+            infoArea.classList.add('hidden');
+
+            try {
+                // GỌI MODEL AI THỰC TẾ
+                const result = await predictDisease(previewImg);
+
+                if (result) {
+                    // Hiển thị kết quả
+                    document.getElementById('diseaseName').textContent = result.name;
+                    document.getElementById('diseaseConfidence').textContent = `Độ tin cậy: ${result.confidence}%`;
+                    
+                    // Bạn có thể thêm mô tả tương ứng với từng bệnh ở đây
+                    document.getElementById('diseaseDescription').textContent = `Hệ thống đã nhận diện được dấu hiệu của ${result.name} trên lá cây.`;
+                    document.getElementById('diseaseTreatment').textContent = `Vui lòng kiểm tra độ ẩm và sử dụng thuốc bảo vệ thực vật phù hợp cho loại cây này.`;
+
+                    resultArea.classList.add('hidden');
+                    infoArea.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error(error);
+                resultArea.innerHTML = `<p class="text-red-500">Lỗi phân tích: ${error.message}</p>`;
+            } finally {
+                analyzeBtn.disabled = false;
+                analyzeBtn.innerHTML = '<i class="fas fa-brain mr-2"></i>Analyze with AI';
+            }
+        });
+    }
+}
+
+        // Initialize application
+        async function initApp() {
+    console.log('Initializing Smart Agriculture System...');
+    
+    // Khởi tạo các biểu đồ
+    initCharts();
+    
+    // Cài đặt các nút điều khiển thiết bị
+    setupControls();
+    
+    // Cài đặt hệ thống AI (Thêm await vì hàm này giờ là async)
+    await setupAIDetection();
+    
+    // Kết nối Firebase
+    listenToSensorData();
+    
+    console.log('System initialized successfully!');
+}
+
+// Giữ nguyên phần lắng nghe DOM
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initApp);
+} else {
+    initApp();
+}
+    </script>
+    
+    <!-- Smooth Scroll & Navigation Script -->
+    <script>
+        // Scroll Progress Bar
+        window.addEventListener('scroll', () => {
+            const winScroll = document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height);
+            document.getElementById('scrollProgress').style.transform = `scaleX(${scrolled})`;
+        });
+        
+        // Active Navigation Link
+        const sections = document.querySelectorAll('.scroll-section');
+        const navLinks = document.querySelectorAll('.nav-link');
+        
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (pageYOffset >= (sectionTop - 200)) {
+                    current = section.getAttribute('id');
+                }
+            });
+            
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + current) {
+                    link.classList.add('active');
+                }
+            });
+        });
+        
+        // Smooth scroll on navigation click
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = link.getAttribute('href').substring(1);
+                const targetSection = document.getElementById(targetId);
+                
+                window.scrollTo({
+                    top: targetSection.offsetTop - 140,
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>
