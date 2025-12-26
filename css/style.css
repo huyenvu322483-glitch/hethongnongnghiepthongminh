@@ -1,0 +1,569 @@
+/**
+ * Smart Agriculture Monitoring System - Custom Styles
+ * Professional agricultural-themed CSS
+ */
+
+/* Global Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    overflow-x: hidden;
+}
+
+/* Sidebar Tab Buttons */
+.tab-button {
+    color: #4a5568;
+    background-color: transparent;
+    transition: all 0.3s ease;
+}
+
+.tab-button:hover {
+    background-color: #f7fafc;
+    color: #2d5016;
+    transform: translateX(5px);
+}
+
+.tab-button.active {
+    background-color: #2d5016;
+    color: white;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.tab-button i {
+    width: 20px;
+}
+
+/* Toggle Switch Styles */
+input[type="checkbox"]:checked ~ .toggle-bg {
+    background-color: #2d5016;
+}
+
+input[type="checkbox"]:checked ~ .toggle-dot {
+    transform: translateX(100%);
+}
+
+.toggle-bg {
+    transition: background-color 0.3s ease;
+}
+
+.toggle-dot {
+    transition: transform 0.3s ease;
+}
+
+/* Card Hover Effects */
+.bg-white {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Enhanced KPI Card Styles */
+.kpi-card {
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+}
+
+.kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.3),
+        transparent
+    );
+    transition: left 0.5s;
+}
+
+.kpi-card:hover::before {
+    left: 100%;
+}
+
+/* Gradient Text Effects */
+.bg-clip-text {
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Enhanced Shadows */
+.shadow-xl {
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 
+                0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.shadow-2xl {
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.hover\:shadow-2xl:hover {
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* ==========================================
+   ENHANCED ANIMATIONS & EFFECTS
+   ========================================== */
+
+/* Fade In Animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.8s ease-out;
+}
+
+/* Slide Up Animation */
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-slide-up {
+    animation: slideUp 0.6s ease-out forwards;
+    opacity: 0;
+}
+
+/* Icon Bounce Animation */
+@keyframes iconBounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-5px);
+    }
+}
+
+.icon-bounce:hover {
+    animation: iconBounce 0.6s ease-in-out infinite;
+}
+
+/* Slow Bounce Animation */
+@keyframes bounceSlow {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-8px);
+    }
+}
+
+.animate-bounce-slow {
+    animation: bounceSlow 2s ease-in-out infinite;
+}
+
+/* Slow Spin Animation */
+@keyframes spinSlow {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.icon-spin-slow {
+    animation: spinSlow 3s linear infinite;
+}
+
+/* Icon Rotate on Hover */
+.icon-rotate:hover {
+    animation: spinSlow 2s linear infinite;
+}
+
+/* Pulse Animation (Connection Status) */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Glow Effect */
+@keyframes glow {
+    0%, 100% {
+        box-shadow: 0 0 5px rgba(45, 80, 22, 0.2);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(45, 80, 22, 0.4), 0 0 30px rgba(107, 142, 35, 0.3);
+    }
+}
+
+.kpi-card:hover {
+    animation: glow 2s ease-in-out infinite;
+}
+
+/* Shimmer Effect */
+@keyframes shimmer {
+    0% {
+        background-position: -1000px 0;
+    }
+    100% {
+        background-position: 1000px 0;
+    }
+}
+
+.shimmer {
+    background: linear-gradient(
+        to right,
+        #f0f0f0 0%,
+        #e0e0e0 20%,
+        #f0f0f0 40%,
+        #f0f0f0 100%
+    );
+    background-size: 1000px 100%;
+    animation: shimmer 2s infinite;
+}
+
+/* Status Badges */
+.status-badge-on {
+    background-color: #48bb78;
+    color: white;
+}
+
+.status-badge-off {
+    background-color: #cbd5e0;
+    color: #4a5568;
+}
+
+/* Chart Container */
+canvas {
+    max-height: 400px;
+}
+
+/* Image Upload Area */
+.border-dashed:hover {
+    border-color: #2d5016;
+    background-color: #f7fafc;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Loading Animation */
+.loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    aside {
+        width: 100%;
+        position: fixed;
+        bottom: 0;
+        height: auto;
+        z-index: 1000;
+        overflow-x: auto;
+        overflow-y: hidden;
+    }
+    
+    aside .space-y-2 {
+        display: flex;
+        flex-direction: row;
+        overflow-x: auto;
+        padding-bottom: 10px;
+    }
+    
+    .tab-button {
+        min-width: 150px;
+    }
+    
+    main {
+        margin-bottom: 80px;
+    }
+    
+    /* Mobile KPI Cards */
+    .kpi-card {
+        transform: none !important;
+    }
+    
+    .kpi-card:active {
+        transform: scale(0.98) !important;
+    }
+    
+    /* Reduce animations on mobile */
+    .animate-slide-up {
+        animation: none;
+        opacity: 1;
+    }
+}
+
+/* Tablet Adjustments */
+@media (min-width: 768px) and (max-width: 1024px) {
+    .kpi-card {
+        padding: 1.25rem;
+    }
+    
+    .kpi-card i {
+        font-size: 2rem;
+    }
+}
+
+/* Large Screen Enhancements */
+@media (min-width: 1920px) {
+    .kpi-card {
+        padding: 2rem;
+    }
+    
+    .kpi-card .text-4xl {
+        font-size: 3rem;
+    }
+}
+
+/* Print Styles */
+@media print {
+    aside, nav {
+        display: none;
+    }
+    
+    main {
+        margin: 0;
+        padding: 20px;
+    }
+}
+
+/* Gradient Backgrounds */
+.gradient-agri {
+    background: linear-gradient(135deg, #2d5016 0%, #6b8e23 100%);
+}
+
+/* Custom Alert Styles */
+.alert-success {
+    background-color: #c6f6d5;
+    border-color: #9ae6b4;
+    color: #22543d;
+}
+
+.alert-warning {
+    background-color: #feebc8;
+    border-color: #fbd38d;
+    color: #744210;
+}
+
+.alert-danger {
+    background-color: #fed7d7;
+    border-color: #fc8181;
+    color: #742a2a;
+}
+
+/* Button Animations */
+button {
+    transition: all 0.3s ease;
+}
+
+button:active {
+    transform: scale(0.95);
+}
+
+/* KPI Card Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.tab-content > div {
+    animation: fadeInUp 0.5s ease;
+}
+
+/* Custom Icons Enhancement */
+.fas, .far {
+    display: inline-block;
+}
+
+/* Data Visualization Enhancements */
+.chart-container {
+    position: relative;
+    height: 300px;
+}
+
+/* Toast Notification Styles */
+.toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: white;
+    padding: 16px 24px;
+    border-radius: 8px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    z-index: 9999;
+    animation: slideInRight 0.3s ease;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+    }
+    to {
+        transform: translateX(0);
+    }
+}
+
+/* Agricultural Color Palette */
+:root {
+    --agri-primary: #2d5016;
+    --agri-secondary: #6b8e23;
+    --agri-accent: #8b4513;
+    --agri-light: #f0f4f0;
+    --agri-success: #48bb78;
+    --agri-warning: #ed8936;
+    --agri-danger: #f56565;
+}
+
+/* Image Preview Styles */
+#previewImg {
+    max-height: 400px;
+    object-fit: contain;
+}
+
+/* Control Log Styles */
+#controlLog {
+    font-family: 'Courier New', monospace;
+    font-size: 0.875rem;
+}
+
+.log-entry {
+    padding: 8px 12px;
+    margin-bottom: 4px;
+    background-color: #f7fafc;
+    border-left: 3px solid #cbd5e0;
+    border-radius: 4px;
+}
+
+.log-entry.success {
+    border-left-color: #48bb78;
+    background-color: #f0fff4;
+}
+
+.log-entry.error {
+    border-left-color: #f56565;
+    background-color: #fff5f5;
+}
+
+/* Confidence Bar Animation */
+#confidenceBar {
+    transition: width 1s ease-in-out;
+}
+
+/* Loading Skeleton */
+.skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s ease-in-out infinite;
+}
+
+@keyframes loading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* Enhanced Shadow Effects */
+.shadow-elegant {
+    box-shadow: 0 10px 30px rgba(45, 80, 22, 0.1);
+}
+
+.shadow-3xl {
+    box-shadow: 0 35px 60px -15px rgba(0, 0, 0, 0.3);
+}
+
+.hover\:shadow-3xl:hover {
+    box-shadow: 0 35px 60px -15px rgba(0, 0, 0, 0.3);
+}
+
+/* Smooth Transitions */
+.smooth-transition {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Focus States for Accessibility */
+button:focus,
+input:focus {
+    outline: 2px solid #2d5016;
+    outline-offset: 2px;
+}
+
+/* Grid Layout Enhancements */
+.grid-auto-fit {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
+/* Professional Typography */
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+/* Status Indicator Styles */
+.status-online {
+    color: #48bb78;
+}
+
+.status-offline {
+    color: #f56565;
+}
+
+.status-pending {
+    color: #ed8936;
+}
